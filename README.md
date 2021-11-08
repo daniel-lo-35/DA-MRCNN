@@ -4,7 +4,7 @@ Detectron2 implementation of DA-MRCNN
 ## Installation
 Follow the [guide on Detectron2's documentation](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to install Detectron2.
 
-Then replace `detectron2/modeling/meta_arch/rcnn.py` with our `rcnn.py`, and `detectron2/modeling/backbone/fpn.py` with our `fpn.py`.
+Then replace `detectron2/modeling/meta_arch/rcnn.py` with our `DA-MRCNN/rcnn.py`, and `detectron2/modeling/backbone/fpn.py` with our `DA-MRCNN/fpn.py`.
 
 ## Data Preparation
 We use COCO format to register the dataset.
@@ -18,13 +18,13 @@ register_coco_instances("dataset_name_target_test",{},"path_annotations","path_i
 A pretrained model is recommended. It can be prepared from [ReGion-Based Detector (RGBD)](https://github.com/SJ-Chuang/rgbd).
 
 ## Train
-`trainer.py`
+`tools/trainer.py`
 
 ## Evaluation
-`evaluate.py` uses COCO AP evaluations.
+`tools/evaluate.py` uses COCO AP evaluations.
 
 ## Inference
-`inference.py`
+`tools/inference.py`
 
 ## Reference
 <a id="1">[1]</a> 
