@@ -45,14 +45,14 @@ def main():
     cfg_source.SOLVER.IMS_PER_BATCH = 4
     cfg_source.SOLVER.BASE_LR = 0.00005
     cfg_source.SOLVER.WEIGHT_DECAY = 0.001
-    cfg_source.SOLVER.MAX_ITER = 30000
+    cfg_source.SOLVER.MAX_ITER = 60000
     cfg_source.SOLVER.STEPS = (300,)
     cfg_source.INPUT.MIN_SIZE_TRAIN = (0,)
     cfg_source.INPUT.MIN_SIZE_TEST = 0
     os.makedirs(cfg_source.OUTPUT_DIR, exist_ok=True)
     cfg_source.MODEL.ROI_HEADS.NUM_CLASSES = 2
 
-    # cfg_source.MODEL.WEIGHTS = "./pretrained-model/model_final.pth"     # Import pretrained weight from previous Steelscape models
+    cfg_source.MODEL.WEIGHTS = "./pretrained_model/model_final.pth"     # Import pretrained weight from previous Steelscape models
 
     model = build_model(cfg_source)
 
@@ -96,9 +96,9 @@ def main():
     )
     
     i = 1
-    max_epoch = 545.45 # max iter / min(data_len(data_source, data_target))
     current_epoch = 0
-    data_len = 55
+    data_len = 100
+    max_epoch = cfg_source.SOLVER.MAX_ITER / data_len # max iter / min(data_len(data_source, data_target))
 
     alpha3 = 0
     alpha4 = 0
