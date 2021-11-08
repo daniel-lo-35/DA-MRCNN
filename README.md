@@ -17,6 +17,15 @@ register_coco_instances("dataset_name_target_test",{},"path_annotations","path_i
 ## Pretrained weight
 A pretrained model is recommended. It can be prepared from [ReGion-Based Detector (RGBD)](https://github.com/SJ-Chuang/rgbd).
 
+## Train
+`trainer.py`
+
+## Evaluation
+`evaluate.py` uses COCO AP evaluations.
+
+## Inference
+`inference.py`
+
 ## Reference
 <a id="1">[1]</a> 
 Pasqualino, G., Furnari, A., Signorello, G., Farinella, G. M. (2021). 
