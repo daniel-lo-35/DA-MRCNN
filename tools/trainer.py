@@ -52,6 +52,8 @@ def main():
     os.makedirs(cfg_source.OUTPUT_DIR, exist_ok=True)
     cfg_source.MODEL.ROI_HEADS.NUM_CLASSES = 2
 
+    cfg_source.SOLVER.CHECKPOINT_PERIOD = 30000
+
     cfg_source.MODEL.WEIGHTS = "./pretrained_model/model_final.pth"     # Import pretrained weight from previous Steelscape models
 
     model = build_model(cfg_source)
@@ -104,6 +106,8 @@ def main():
     alpha4 = 0
     alpha5 = 0
 
+    da_ratio = 300    # ratio of Label predictor : domain classifier
+
     data_loader_source = build_detection_train_loader(cfg_source)
     data_loader_target = build_detection_train_loader(cfg_target) 
     logger.info("Starting training from iteration {}".format(start_iter))
@@ -133,16 +137,20 @@ def main():
 
             # if alpha5 > 0.1:
             #     alpha5 = 0.1
-            
-            loss_dict = model(data_source, False, alpha3, alpha4, alpha5)
-            loss_dict_target = model(data_target, True, alpha3, alpha4, alpha5)
-            loss_dict["loss_r3"] += loss_dict_target["loss_r3"]
-            loss_dict["loss_r4"] += loss_dict_target["loss_r4"]
-            loss_dict["loss_r5"] += loss_dict_target["loss_r5"]
 
-            loss_dict["loss_r3"] *= 0.5
-            loss_dict["loss_r4"] *= 0.5
-            loss_dict["loss_r5"] *= 0.5
+            da_bool = iteration % da_ratio == 0
+            
+            loss_dict = model(data_source, False, da_bool, alpha3, alpha4, alpha5)
+
+            if da_bool:
+                loss_dict_target = model(data_target, True, da_bool, alpha3, alpha4, alpha5)
+                loss_dict["loss_r3"] += loss_dict_target["loss_r3"]
+                loss_dict["loss_r4"] += loss_dict_target["loss_r4"]
+                loss_dict["loss_r5"] += loss_dict_target["loss_r5"]
+
+                loss_dict["loss_r3"] *= 0.5
+                loss_dict["loss_r4"] *= 0.5
+                loss_dict["loss_r5"] *= 0.5
 
             losses = sum(loss_dict.values())
             assert torch.isfinite(losses).all(), loss_dict
@@ -159,7 +167,7 @@ def main():
             storage.put_scalar("alpha", alpha, smoothing_hint=False)
             scheduler.step()
 
-            if iteration - start_iter > 5 and (iteration % 20 == 0 or iteration == max_iter):
+            if iteration - start_iter > 5 and (da_bool or iteration == max_iter):
                 for writer in writers:
                     writer.write()
             periodic_checkpointer.step(iteration)

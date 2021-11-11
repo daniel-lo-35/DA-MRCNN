@@ -265,7 +265,7 @@ class GeneralizedRCNN(nn.Module):
             storage.put_image(vis_name, vis_img)
             break  # only visualize one image in a batch
 
-    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], domain_target = False, alpha3 = 1, alpha4 = 1, alpha5 = 1):
+    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]], domain_target = False, da_bool = False, alpha3 = 1, alpha4 = 1, alpha5 = 1):
         """
         Args:
             batched_inputs: a list, batched outputs of :class:`DatasetMapper` .
@@ -299,15 +299,12 @@ class GeneralizedRCNN(nn.Module):
 
         features, res = self.backbone(images.tensor)
 
-        if domain_target:
+        if da_bool:
             loss_res3 = self.discriminatorRes3(res["res3"], domain_target, alpha3)
             loss_res4 = self.discriminatorRes4(res["res4"], domain_target, alpha4)
             loss_res5 = self.discriminatorRes5(res["res5"], domain_target, alpha5)
-            return {"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5}
-        else:
-            loss_res3 = self.discriminatorRes3(res["res3"], domain_target, alpha3)
-            loss_res4 = self.discriminatorRes4(res["res4"], domain_target, alpha4)
-            loss_res5 = self.discriminatorRes5(res["res5"], domain_target, alpha5)
+            if domain_target:
+                return {"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5}
 
         if self.proposal_generator is not None:
             proposals, proposal_losses = self.proposal_generator(images, features, gt_instances)
@@ -326,7 +323,8 @@ class GeneralizedRCNN(nn.Module):
         losses.update(detector_losses)
         losses.update(proposal_losses)
 
-        losses.update({"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5})
+        if da_bool:
+            losses.update({"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5})
 
         return losses
 

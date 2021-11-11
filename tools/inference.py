@@ -72,7 +72,7 @@ def main():
         )
         out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
         # cv2.imshow(out.get_image()[:, :, ::-1])
-        cv2.imwrite(os.path.join("inference", f), out.get_image()[:, :, ::-1])
+        cv2.imwrite(os.path.join("inference-target", f), out.get_image()[:, :, ::-1])
 
 
     """ INFERENCE """
@@ -93,7 +93,7 @@ def main():
         )
         out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
         # cv2.imshow(out.get_image()[:, :, ::-1])
-        cv2.imwrite(os.path.join("inference", f), out.get_image()[:, :, ::-1])
+        cv2.imwrite(os.path.join("inference-source", f), out.get_image()[:, :, ::-1])
 
 
 if __name__ == "__main__":
