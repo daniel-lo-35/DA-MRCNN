@@ -20,6 +20,8 @@ A pretrained model is recommended. It can be prepared from [ReGion-Based Detecto
 ## Train
 `tools/trainer.py`
 
+_Remarks:_ If the last checkpoint is 30000 iteration (e.g. from the pretrained weight above), the MAX_ITER must be greater than 30000.
+
 ## Evaluation
 `tools/evaluate.py` uses COCO AP evaluations.
 
