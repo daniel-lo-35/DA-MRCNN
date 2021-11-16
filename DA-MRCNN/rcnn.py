@@ -303,8 +303,8 @@ class GeneralizedRCNN(nn.Module):
             loss_res3 = self.discriminatorRes3(res["res3"], domain_target, alpha3)
             loss_res4 = self.discriminatorRes4(res["res4"], domain_target, alpha4)
             loss_res5 = self.discriminatorRes5(res["res5"], domain_target, alpha5)
-            if domain_target:
-                return {"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5}
+            # if domain_target:
+            return {"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5}
 
         if self.proposal_generator is not None:
             proposals, proposal_losses = self.proposal_generator(images, features, gt_instances)
@@ -323,8 +323,8 @@ class GeneralizedRCNN(nn.Module):
         losses.update(detector_losses)
         losses.update(proposal_losses)
 
-        if da_bool:
-            losses.update({"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5})
+        # if da_bool:
+        #     losses.update({"loss_r3": loss_res3, "loss_r4": loss_res4, "loss_r5": loss_res5})
 
         return losses
 
