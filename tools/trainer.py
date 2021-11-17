@@ -262,4 +262,4 @@ def main():
 
 
 if __name__ == "__main__":
-    launch(main, 3)    # Use more GPUs to prevent CUDA out of memory
+    launch(main, 4)    # Use more GPUs to prevent CUDA out of memory
