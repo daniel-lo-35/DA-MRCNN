@@ -133,7 +133,7 @@ def main():
     alpha4 = 0
     alpha5 = 0
 
-    da_ratio = 1    # ratio of Label predictor : domain classifier
+    da_ratio = 100    # ratio of Label predictor : domain classifier
 
     data_loader_source = build_detection_train_loader(cfg_source)
     data_loader_target = build_detection_train_loader(cfg_target)
@@ -262,4 +262,4 @@ def main():
 
 
 if __name__ == "__main__":
-    launch(main, 2)    # Use 2 GPUs to prevent CUDA out of memory
+    launch(main, 3)    # Use more GPUs to prevent CUDA out of memory

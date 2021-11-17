@@ -17,13 +17,14 @@ from detectron2.checkpoint import DetectionCheckpointer
 
 
 def main():
-    register_coco_instances("2019_train", {}, "./train_2019/annotations_train.json", "./train_2019")
-    # register_coco_instances("2019_val", {}, "./val_2019/annotations_val.json", "./val_2019")
-    # register_coco_instances("2019_test", {}, "./test_2019/annotations_test.json", "./test_2019")
+    register_coco_instances("2019_train", {}, "./2019_train/annotations_train.json", "./2019_train")
+    register_coco_instances("2019_val", {}, "./2019_val/annotations_val.json", "./2019_val")
+    # register_coco_instances("2019_da", {}, "./2019_da/annotations_train.json", "./2019_da")
+    # register_coco_instances("2019_da_val", {}, "./2019_da_val/annotations_val.json", "./2019_da_val")
 
-    register_coco_instances("2021_train", {}, "./train_2021/annotations_train.json", "./train_2021")
-    # register_coco_instances("2021_val", {}, "./val_2021/annotations_val.json", "./val_2021")
-    register_coco_instances("2021_test", {}, "./test_2021/annotations_test.json", "./test_2021")
+    register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
+    # register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
+    # register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
 
     setup_logger()
     logger = logging.getLogger("detectron2")
@@ -41,6 +42,7 @@ def main():
     cfg_source.SOLVER.WEIGHT_DECAY = 0.001
     cfg_source.SOLVER.MAX_ITER = 30000
     cfg_source.SOLVER.STEPS = (300,)
+    cfg_source.SOLVER.GAMMA = 0.5
     cfg_source.INPUT.MIN_SIZE_TRAIN = (0,)
     cfg_source.INPUT.MIN_SIZE_TEST = 0
     os.makedirs(cfg_source.OUTPUT_DIR, exist_ok=True)
@@ -50,12 +52,6 @@ def main():
 
     model = build_model(cfg_source)
 
-    # cfg_target = get_cfg()
-    # cfg_target.DATASETS.TRAIN = ("2021_train",)
-    # cfg_target.DATASETS.TEST = ("2021_test",)
-    # cfg_target.INPUT.MIN_SIZE_TRAIN = (0,)
-    # cfg_target.DATALOADER.NUM_WORKERS = 2
-    # cfg_target.SOLVER.IMS_PER_BATCH = 4
 
     DetectionCheckpointer(model).load(cfg_source.MODEL.WEIGHTS)
 
@@ -65,7 +61,11 @@ def main():
     val_loader = build_detection_test_loader(cfg_source, "2019_train")
     inference_on_dataset(model, val_loader, evaluator)
 
-    """ TEST """
+    print("############ 2019 VAL ############")
+    evaluator = COCOEvaluator("2019_val", cfg_source, False, output_dir="./output/")
+    val_loader = build_detection_test_loader(cfg_source, "2019_val")
+    inference_on_dataset(model, val_loader, evaluator)
+
     print("############ 2021 TEST ############")
     evaluator = COCOEvaluator("2021_test", cfg_source, False, output_dir="./output/")
     val_loader = build_detection_test_loader(cfg_source, "2021_test")

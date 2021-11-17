@@ -16,55 +16,55 @@ from detectron2.checkpoint import DetectionCheckpointer
 
 
 def main():
-    register_coco_instances("2019_train", {}, "./train_2019/annotations_train.json", "./train_2019")
-    # register_coco_instances("2019_val", {}, "./val_2019/annotations_val.json", "./val_2019")
-    # register_coco_instances("2019_test", {}, "./test_2019/annotations_test.json", "./test_2019")
+    # register_coco_instances("2019_train", {}, "./2019_train/annotations_train.json", "./2019_train")
+    # register_coco_instances("2019_val", {}, "./2019_val/annotations_val.json", "./2019_val")
+    register_coco_instances("2019_da", {}, "./2019_da/annotations_train.json", "./2019_da")
+    register_coco_instances("2019_da_val", {}, "./2019_da_val/annotations_val.json", "./2019_da_val")
 
-    register_coco_instances("2021_train", {}, "./train_2021/annotations_train.json", "./train_2021")
-    # register_coco_instances("2021_val", {}, "./val_2021/annotations_val.json", "./val_2021")
-    register_coco_instances("2021_test", {}, "./test_2021/annotations_test.json", "./test_2021")
+    # register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
+    register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
+    register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
 
     setup_logger()
     logger = logging.getLogger("detectron2")
 
     cfg_source = get_cfg()
     cfg_source.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
-    # cfg_source.merge_from_file(model_zoo.get_config_file("new_baselines/mask_rcnn_R_101_FPN_400ep_LSJ.py"))
-    cfg_source.DATASETS.TRAIN = ("2019_train",)
-    cfg_source.DATASETS.TEST = ()
+    # cfg_source.merge_from_file(model_zoo.get_config_file("new_baselines/mask_rcnn_R_101_FPN_400ep_LSJ.py"))    # Detectron2's new MRCNN baseline, to be investigated
+    cfg_source.DATASETS.TRAIN = ("2019_da",)
+    # cfg_source.DATASETS.TEST = ()
+    cfg_source.DATASETS.VAL = ("2019_da_val",)
+    cfg_source.DATASETS.TEST = ("2021_da",)
+    # cfg_source.TEST.EVAL_PERIOD = 300
     cfg_source.DATALOADER.NUM_WORKERS = 2
     cfg_source.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
     # cfg_source.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("new_baselines/mask_rcnn_R_101_FPN_400ep_LSJ.py")
     cfg_source.SOLVER.IMS_PER_BATCH = 4
     cfg_source.SOLVER.BASE_LR = 0.00005
     cfg_source.SOLVER.WEIGHT_DECAY = 0.001
-    cfg_source.SOLVER.MAX_ITER = 30000
+    cfg_source.SOLVER.MAX_ITER = 60000
     cfg_source.SOLVER.STEPS = (300,)
+    cfg_source.SOLVER.GAMMA = 0.5
     cfg_source.INPUT.MIN_SIZE_TRAIN = (0,)
     cfg_source.INPUT.MIN_SIZE_TEST = 0
-    # os.makedirs(cfg_source.OUTPUT_DIR, exist_ok=True)
     cfg_source.MODEL.ROI_HEADS.NUM_CLASSES = 2
 
     cfg_source.MODEL.WEIGHTS = "./output/model_final.pth"
 
     model = build_model(cfg_source)
 
-    # cfg_target = get_cfg()
-    # cfg_target.DATASETS.TRAIN = ("2021_train",)
-    # cfg_target.DATASETS.TEST = ("2021_test",)
-    # cfg_target.INPUT.MIN_SIZE_TRAIN = (0,)
-    # cfg_target.DATALOADER.NUM_WORKERS = 2
-    # cfg_target.SOLVER.IMS_PER_BATCH = 4
 
     DetectionCheckpointer(model).load(cfg_source.MODEL.WEIGHTS)
 
-    data_loader_source = build_detection_test_loader(cfg_source, "2019_train")
-    data_loader_target = build_detection_test_loader(cfg_source, "2021_train") 
+    data_loader_source1 = build_detection_test_loader(cfg_source, "2019_da")
+    data_loader_source2 = build_detection_test_loader(cfg_source, "2019_da_val")
+    data_loader_target1 = build_detection_test_loader(cfg_source, "2021_da")
+    data_loader_target2 = build_detection_test_loader(cfg_source, "2021_da_val") 
 
     model.eval()
 
     ############ 2019 TRAIN ############
-    for idx, batch in enumerate(data_loader_source):
+    for idx, batch in enumerate(data_loader_source1):
         images = model.preprocess_image(batch)
         features, res = model.backbone(images.tensor)
         current_output3 = res["res3"].cpu().detach().numpy()
@@ -80,8 +80,20 @@ def main():
             features_source4 = np.concatenate((features_source4, current_output4))
             features_source5 = np.concatenate((features_source5, current_output5))
 
+    for idx, batch in enumerate(data_loader_source2):
+        images = model.preprocess_image(batch)
+        features, res = model.backbone(images.tensor)
+        current_output3 = res["res3"].cpu().detach().numpy()
+        current_output4 = res["res4"].cpu().detach().numpy()
+        current_output5 = res["res5"].cpu().detach().numpy()
+
+        features_source3 = np.concatenate((features_source3, current_output3))
+        features_source4 = np.concatenate((features_source4, current_output4))
+        features_source5 = np.concatenate((features_source5, current_output5))
+
+
     ############ 2021 TRAIN ############
-    for idx, batch in enumerate(data_loader_target):
+    for idx, batch in enumerate(data_loader_target1):
         images = model.preprocess_image(batch)
         features, res = model.backbone(images.tensor)
         current_output3 = res["res3"].cpu().detach().numpy()
@@ -96,6 +108,18 @@ def main():
             features_target3 = np.concatenate((features_target3, current_output3))
             features_target4 = np.concatenate((features_target4, current_output4))
             features_target5 = np.concatenate((features_target5, current_output5))
+
+    for idx, batch in enumerate(data_loader_target2):
+        images = model.preprocess_image(batch)
+        features, res = model.backbone(images.tensor)
+        current_output3 = res["res3"].cpu().detach().numpy()
+        current_output4 = res["res4"].cpu().detach().numpy()
+        current_output5 = res["res5"].cpu().detach().numpy()
+
+        features_target3 = np.concatenate((features_target3, current_output3))
+        features_target4 = np.concatenate((features_target4, current_output4))
+        features_target5 = np.concatenate((features_target5, current_output5))
+
 
     features3 = np.concatenate((features_source3, features_target3))
     features4 = np.concatenate((features_source4, features_target4))
@@ -123,7 +147,7 @@ def main():
     pylab.figure(figsize=(10,10))
     for i in np.arange(len(tsne3)):
         c = 'r'
-        if i < 176:    # len(data_loader_source) = 176
+        if i < 302:    # len(data_loader_source) = 302
             c = 'b'
         x, y = (tsne3[i,0],tsne3[i,1])
         pylab.scatter(x,y,c=c)
@@ -137,7 +161,7 @@ def main():
     pylab.figure(figsize=(10,10))
     for i in np.arange(len(tsne4)):
         c = 'r'
-        if i < 176:    # len(data_loader_source) = 176
+        if i < 302:    # len(data_loader_source) = 302
             c = 'b'
         x, y = (tsne4[i,0],tsne4[i,1])
         pylab.scatter(x,y,c=c)
@@ -151,7 +175,7 @@ def main():
     pylab.figure(figsize=(10,10))
     for i in np.arange(len(tsne5)):
         c = 'r'
-        if i < 176:    # len(data_loader_source) = 176
+        if i < 302:    # len(data_loader_source) = 302
             c = 'b'
         x, y = (tsne5[i,0],tsne5[i,1])
         pylab.scatter(x,y,c=c)
