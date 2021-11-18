@@ -22,13 +22,14 @@ from detectron2.utils.visualizer import ColorMode
 
 
 def main():
-    register_coco_instances("2019_train", {}, "./train_2019/annotations_train.json", "./train_2019")
-    # register_coco_instances("2019_val", {}, "./val_2019/annotations_val.json", "./val_2019")
-    # register_coco_instances("2019_test", {}, "./test_2019/annotations_test.json", "./test_2019")
+    register_coco_instances("2019_train", {}, "./2019_train/annotations_train.json", "./2019_train")
+    register_coco_instances("2019_val", {}, "./2019_val/annotations_val.json", "./2019_val")
+    # register_coco_instances("2019_da", {}, "./2019_da/annotations_train.json", "./2019_da")
+    # register_coco_instances("2019_da_val", {}, "./2019_da_val/annotations_val.json", "./2019_da_val")
 
-    register_coco_instances("2021_train", {}, "./train_2021/annotations_train.json", "./train_2021")
-    # register_coco_instances("2021_val", {}, "./val_2021/annotations_val.json", "./val_2021")
-    register_coco_instances("2021_test", {}, "./test_2021/annotations_test.json", "./test_2021")
+    # register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
+    # register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
+    register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
 
     setup_logger()
     logger = logging.getLogger("detectron2")
@@ -57,10 +58,10 @@ def main():
     """ INFERENCE """
     predictor = DefaultPredictor(cfg_source)
 
-    test_path = "./test_2021/JPEGImages"
+    test_path = "./2021_da_val/JPEGImages"
     files = os.listdir(test_path)
     steel_metadata = MetadataCatalog.get("2019_train")
-    os.makedirs("inference-target", exist_ok=True)
+    os.makedirs("inference-target")
 
     for f in files:
         im = cv2.imread(os.path.join(test_path, f))
@@ -75,13 +76,10 @@ def main():
         cv2.imwrite(os.path.join("inference-target", f), out.get_image()[:, :, ::-1])
 
 
-    """ INFERENCE """
-    predictor = DefaultPredictor(cfg_source)
-
-    test_path = "./train_2019/JPEGImages"
+    test_path = "./2019_val/JPEGImages"
     files = os.listdir(test_path)
-    steel_metadata = MetadataCatalog.get("2019_train")
-    os.makedirs("inference-source", exist_ok=True)
+
+    os.makedirs("inference-source")
 
     for f in files:
         im = cv2.imread(os.path.join(test_path, f))
@@ -97,4 +95,4 @@ def main():
 
 
 if __name__ == "__main__":
-    launch(main, 2)
+    main()

@@ -62,13 +62,6 @@ def main():
 
     model = build_model(cfg_source)
 
-    # cfg_target = get_cfg()
-    # cfg_target.DATASETS.TRAIN = ("2021_train",)
-    # cfg_target.DATASETS.TEST = ("2021_test",)
-    # cfg_target.INPUT.MIN_SIZE_TRAIN = (0,)
-    # cfg_target.DATALOADER.NUM_WORKERS = 2
-    # cfg_target.SOLVER.IMS_PER_BATCH = 4
-
     cfg_target = cfg_source.clone()
     cfg_target.DATASETS.TRAIN = cfg_source.DATASETS.TEST
 
@@ -262,4 +255,4 @@ def main():
 
 
 if __name__ == "__main__":
-    launch(main, 4)    # Use more GPUs to prevent CUDA out of memory
+    launch(main, 2)    # Use more GPUs to prevent CUDA out of memory
