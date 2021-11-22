@@ -9,9 +9,14 @@ Then replace `detectron2/modeling/meta_arch/rcnn.py` with our `DA-MRCNN/rcnn.py`
 ## Data Preparation
 We use COCO format to register the dataset.
 ```
-register_coco_instances("dataset_name_soruce_training",{},"path_annotations","path_images")
-register_coco_instances("dataset_name_target_training",{},"path_annotations","path_images")
+register_coco_instances("dataset_name_source_training",{},"path_annotations","path_images")
+register_coco_instances("dataset_name_source_validation",{},"path_annotations","path_images")
+register_coco_instances("dataset_name_source_domain_adaptation_training",{},"path_annotations","path_images")
+register_coco_instances("dataset_name_source_domain_adaptation_validation",{},"path_annotations","path_images")
+
 register_coco_instances("dataset_name_target_test",{},"path_annotations","path_images")
+register_coco_instances("dataset_name_target_domain_adaptation_training",{},"path_annotations","path_images")
+register_coco_instances("dataset_name_target_domain_adaptation_validation",{},"path_annotations","path_images")
 ```
 
 ## Pretrained weight
