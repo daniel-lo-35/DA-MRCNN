@@ -21,14 +21,21 @@ from detectron2.engine import launch
 
 
 def main():
+    # 2019 U-girder
     register_coco_instances("2019_train", {}, "./2019_train/annotations_train.json", "./2019_train")
     register_coco_instances("2019_val", {}, "./2019_val/annotations_val.json", "./2019_val")
     register_coco_instances("2019_da", {}, "./2019_da/annotations_train.json", "./2019_da")
     register_coco_instances("2019_da_val", {}, "./2019_da_val/annotations_val.json", "./2019_da_val")
 
-    register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
-    register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
-    register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
+    # 2021 U-girder
+    # register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
+    # register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
+    # register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
+
+    # 2021 Continuous Wall
+    register_coco_instances("2021_test", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
+    register_coco_instances("2021_da", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
+    register_coco_instances("2021_da_val", {}, "./2021_wall_da_val/annotations_val.json", "./2021_wall_da_val")
 
 
     setup_logger()
@@ -48,7 +55,7 @@ def main():
     cfg_source.SOLVER.IMS_PER_BATCH = 4
     cfg_source.SOLVER.BASE_LR = 0.00005
     cfg_source.SOLVER.WEIGHT_DECAY = 0.001
-    cfg_source.SOLVER.MAX_ITER = 60000
+    cfg_source.SOLVER.MAX_ITER = 80000
     cfg_source.SOLVER.STEPS = (300,)
     cfg_source.SOLVER.GAMMA = 0.5
     cfg_source.INPUT.MIN_SIZE_TRAIN = (0,)
@@ -56,7 +63,7 @@ def main():
     os.makedirs(cfg_source.OUTPUT_DIR, exist_ok=True)
     cfg_source.MODEL.ROI_HEADS.NUM_CLASSES = 2
 
-    cfg_source.SOLVER.CHECKPOINT_PERIOD = 30000
+    cfg_source.SOLVER.CHECKPOINT_PERIOD = 60000
 
     cfg_source.MODEL.WEIGHTS = "./pretrained_model/model_final.pth"     # Import pretrained weight from previous Steelscape models
 
