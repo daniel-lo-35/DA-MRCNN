@@ -17,14 +17,21 @@ from detectron2.checkpoint import DetectionCheckpointer
 
 
 def main():
+    # 2019 U-girder
     register_coco_instances("2019_train", {}, "./2019_train/annotations_train.json", "./2019_train")
     register_coco_instances("2019_val", {}, "./2019_val/annotations_val.json", "./2019_val")
     # register_coco_instances("2019_da", {}, "./2019_da/annotations_train.json", "./2019_da")
     # register_coco_instances("2019_da_val", {}, "./2019_da_val/annotations_val.json", "./2019_da_val")
 
+    # 2021 U-girder
     register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
     # register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
     # register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
+
+    # 2021 Continuous Wall
+    register_coco_instances("2021_wall_test", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
+    # register_coco_instances("2021_da", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
+    # register_coco_instances("2021_da_val", {}, "./2021_wall_da_val/annotations_val.json", "./2021_wall_da_val")
 
     setup_logger()
     logger = logging.getLogger("detectron2")
@@ -66,7 +73,12 @@ def main():
     val_loader = build_detection_test_loader(cfg_source, "2019_val")
     inference_on_dataset(model, val_loader, evaluator)
 
-    print("############ 2021 TEST ############")
+    print("############ 2021 Walls TEST ############")
+    evaluator = COCOEvaluator("2021_wall_test", cfg_source, False, output_dir="./output/")
+    val_loader = build_detection_test_loader(cfg_source, "2021_wall_test")
+    inference_on_dataset(model, val_loader, evaluator)
+
+    print("############ 2021 U-girder ############")
     evaluator = COCOEvaluator("2021_test", cfg_source, False, output_dir="./output/")
     val_loader = build_detection_test_loader(cfg_source, "2021_test")
     inference_on_dataset(model, val_loader, evaluator)

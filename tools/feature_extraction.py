@@ -16,14 +16,21 @@ from detectron2.checkpoint import DetectionCheckpointer
 
 
 def main():
+    # 2019 U-girder
     # register_coco_instances("2019_train", {}, "./2019_train/annotations_train.json", "./2019_train")
     # register_coco_instances("2019_val", {}, "./2019_val/annotations_val.json", "./2019_val")
     register_coco_instances("2019_da", {}, "./2019_da/annotations_train.json", "./2019_da")
     register_coco_instances("2019_da_val", {}, "./2019_da_val/annotations_val.json", "./2019_da_val")
 
+    # 2021 U-girder
     # register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
     register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
     register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
+
+    # 2021 Continuous Wall
+    # register_coco_instances("2021_wall_test", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
+    register_coco_instances("2021_wall_da", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
+    register_coco_instances("2021_wall_da_val", {}, "./2021_wall_da_val/annotations_val.json", "./2021_wall_da_val")
 
     setup_logger()
     logger = logging.getLogger("detectron2")
@@ -60,6 +67,8 @@ def main():
     data_loader_source2 = build_detection_test_loader(cfg_source, "2019_da_val")
     data_loader_target1 = build_detection_test_loader(cfg_source, "2021_da")
     data_loader_target2 = build_detection_test_loader(cfg_source, "2021_da_val") 
+    data_loader_target3 = build_detection_test_loader(cfg_source, "2021_wall_da")
+    data_loader_target4 = build_detection_test_loader(cfg_source, "2021_wall_da_val") 
 
     model.eval()
 
@@ -92,7 +101,7 @@ def main():
         features_source5 = np.concatenate((features_source5, current_output5))
 
 
-    ############ 2021 TRAIN ############
+    ############ 2021 U-girder ############
     for idx, batch in enumerate(data_loader_target1):
         images = model.preprocess_image(batch)
         features, res = model.backbone(images.tensor)
@@ -110,6 +119,29 @@ def main():
             features_target5 = np.concatenate((features_target5, current_output5))
 
     for idx, batch in enumerate(data_loader_target2):
+        images = model.preprocess_image(batch)
+        features, res = model.backbone(images.tensor)
+        current_output3 = res["res3"].cpu().detach().numpy()
+        current_output4 = res["res4"].cpu().detach().numpy()
+        current_output5 = res["res5"].cpu().detach().numpy()
+
+        features_target3 = np.concatenate((features_target3, current_output3))
+        features_target4 = np.concatenate((features_target4, current_output4))
+        features_target5 = np.concatenate((features_target5, current_output5))
+
+    ############ 2021 Walls ############
+    for idx, batch in enumerate(data_loader_target3):
+        images = model.preprocess_image(batch)
+        features, res = model.backbone(images.tensor)
+        current_output3 = res["res3"].cpu().detach().numpy()
+        current_output4 = res["res4"].cpu().detach().numpy()
+        current_output5 = res["res5"].cpu().detach().numpy()
+
+        features_target3 = np.concatenate((features_target3, current_output3))
+        features_target4 = np.concatenate((features_target4, current_output4))
+        features_target5 = np.concatenate((features_target5, current_output5))
+
+    for idx, batch in enumerate(data_loader_target4):
         images = model.preprocess_image(batch)
         features, res = model.backbone(images.tensor)
         current_output3 = res["res3"].cpu().detach().numpy()
@@ -149,6 +181,8 @@ def main():
         c = 'r'
         if i < 302:    # len(data_loader_source) = 302
             c = 'b'
+        elif i < 502:    # len(data_loader_target(U-girder)) = 200
+            c = 'g'
         x, y = (tsne3[i,0],tsne3[i,1])
         pylab.scatter(x,y,c=c)
         #pylab.annotate(str(Lab[i][0]), xy=(x,y), xytext=(0, 0), textcoords='offset points',
@@ -163,6 +197,8 @@ def main():
         c = 'r'
         if i < 302:    # len(data_loader_source) = 302
             c = 'b'
+        elif i < 502:    # len(data_loader_target(U-girder)) = 200
+            c = 'g'
         x, y = (tsne4[i,0],tsne4[i,1])
         pylab.scatter(x,y,c=c)
         #pylab.annotate(str(Lab[i][0]), xy=(x,y), xytext=(0, 0), textcoords='offset points',
@@ -177,6 +213,8 @@ def main():
         c = 'r'
         if i < 302:    # len(data_loader_source) = 302
             c = 'b'
+        elif i < 502:    # len(data_loader_target(U-girder)) = 200
+            c = 'g'
         x, y = (tsne5[i,0],tsne5[i,1])
         pylab.scatter(x,y,c=c)
         #pylab.annotate(str(Lab[i][0]), xy=(x,y), xytext=(0, 0), textcoords='offset points',
@@ -184,7 +222,7 @@ def main():
     # pylab.show()
     pylab.savefig("tSNE-res5.png")
 
-    # Plot Note: Blue is 2019, Red is 2021
+    # Plot Note: Blue is 2019 U-girder, Green is 2021 U-girder, Red is 2021 Continuous Walls
 
 
 if __name__ == "__main__":
