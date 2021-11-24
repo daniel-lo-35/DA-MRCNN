@@ -1,5 +1,5 @@
 # DA-MRCNN
-Detectron2 implementation of DA-MRCNN
+Detectron2 implementation of DA-Mask R-CNN
 
 ## Installation
 Follow the [guide on Detectron2's documentation](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to install Detectron2.
