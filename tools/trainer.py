@@ -28,14 +28,14 @@ def main():
     register_coco_instances("2019_da_val", {}, "./2019_da_val/annotations_val.json", "./2019_da_val")
 
     # 2021 U-girder
-    # register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
-    # register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
-    # register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
+    register_coco_instances("2021_test", {}, "./2021_test/annotations_test.json", "./2021_test")
+    register_coco_instances("2021_da", {}, "./2021_da/annotations_train.json", "./2021_da")
+    register_coco_instances("2021_da_val", {}, "./2021_da_val/annotations_val.json", "./2021_da_val")
 
-    # 2021 Continuous Wall
-    register_coco_instances("2021_test", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
-    register_coco_instances("2021_da", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
-    register_coco_instances("2021_da_val", {}, "./2021_wall_da_val/annotations_val.json", "./2021_wall_da_val")
+    # 2021 Diaphragm Wall
+    # register_coco_instances("2021_test", {}, "./2021_wall_test/annotations_test.json", "./2021_wall_test")
+    # register_coco_instances("2021_da", {}, "./2021_wall_test/annotations_train_pl.json", "./2021_wall_test")    # Need pseudo labels of target domain
+    # register_coco_instances("2021_da_val", {}, "./2021_wall_da_val/annotations_val.json", "./2021_wall_da_val")
 
 
     setup_logger()
@@ -55,7 +55,7 @@ def main():
     cfg_source.SOLVER.IMS_PER_BATCH = 4
     cfg_source.SOLVER.BASE_LR = 0.00005
     cfg_source.SOLVER.WEIGHT_DECAY = 0.001
-    cfg_source.SOLVER.MAX_ITER = 80000
+    cfg_source.SOLVER.MAX_ITER = 60000
     cfg_source.SOLVER.STEPS = (300,)
     cfg_source.SOLVER.GAMMA = 0.5
     cfg_source.INPUT.MIN_SIZE_TRAIN = (0,)
@@ -63,7 +63,10 @@ def main():
     os.makedirs(cfg_source.OUTPUT_DIR, exist_ok=True)
     cfg_source.MODEL.ROI_HEADS.NUM_CLASSES = 2
 
-    cfg_source.SOLVER.CHECKPOINT_PERIOD = 60000
+    cfg_source.SOLVER.CHECKPOINT_PERIOD = cfg_source.SOLVER.MAX_ITER
+
+    # cfg_source.MODEL.PIXEL_MEAN = [103.530, 116.280, 123.675]    # Detectron2 uses ImageNet mean pixel value as default values for image normalization (BGR order)
+    # cfg_source.MODEL.PIXEL_MEAN = [107.359, 104.458, 99.551]    # Mean pixel value of 2019 U-girder (Source domain)
 
     cfg_source.MODEL.WEIGHTS = "./pretrained_model/model_final.pth"     # Import pretrained weight from previous Steelscape models
 
@@ -127,7 +130,7 @@ def main():
     i = 1
     current_epoch = 0
     data_len = 176
-    max_epoch = cfg_source.SOLVER.MAX_ITER / data_len # max iter / min(data_len(data_source, data_target))
+    max_epoch = max_iter / data_len # max iter / min(data_len(data_source, data_target))
 
     alpha3 = 0
     alpha4 = 0
@@ -173,7 +176,10 @@ def main():
 
             da_bool = iteration % da_ratio == 0
             
-            loss_dict = model(data_source)
+            if iteration % 2 == 0:
+                loss_dict = model(data_source)
+            else:
+                loss_dict = model(data_da_target)    # Need pseudo labels of target domain
 
             if da_bool:
                 loss_dict_source = model(data_da_source, False, True, alpha3, alpha4, alpha5)
@@ -259,6 +265,12 @@ def main():
                 for writer in writers:
                     writer.write()
             periodic_checkpointer.step(iteration)
+
+            if iteration == max_iter:
+                with open("cfg_source.yaml", "w") as f:
+                    f.write(cfg_source.dump())   # save config to file
+                with open("cfg_target.yaml", "w") as f:
+                    f.write(cfg_target.dump())   # save config to file
 
 
 if __name__ == "__main__":
