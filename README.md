@@ -1,5 +1,5 @@
-# DA-MRCNN
-Detectron2 implementation of DA-MRCNN
+# DA-MRCNN: Domain Adaptive Mask R-CNN
+Detectron2 implementation of Domain Adaptive Mask R-CNN
 
 ## Installation
 Follow the [guide on Detectron2's documentation](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to install Detectron2.
