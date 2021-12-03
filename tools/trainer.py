@@ -43,7 +43,7 @@ def main():
 
     cfg_source = get_cfg()
     cfg_source.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml"))
-    # cfg_source.merge_from_file(model_zoo.get_config_file("new_baselines/mask_rcnn_R_101_FPN_400ep_LSJ.py"))    # Detectron2's new MRCNN baseline, to be investigated
+    # cfg_source = model_zoo.get_config("new_baselines/mask_rcnn_R_101_FPN_400ep_LSJ.py"))    # Detectron2's new MRCNN baseline, to be investigated
     cfg_source.DATASETS.TRAIN = ("2019_train",)
     # cfg_source.DATASETS.TEST = ()
     cfg_source.DATASETS.VAL = ("2019_val",)
@@ -51,7 +51,6 @@ def main():
     # cfg_source.TEST.EVAL_PERIOD = 300
     cfg_source.DATALOADER.NUM_WORKERS = 2
     cfg_source.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
-    # cfg_source.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("new_baselines/mask_rcnn_R_101_FPN_400ep_LSJ.py")
     cfg_source.SOLVER.IMS_PER_BATCH = 4
     cfg_source.SOLVER.BASE_LR = 0.00005
     cfg_source.SOLVER.WEIGHT_DECAY = 0.001
